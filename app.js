@@ -17,11 +17,13 @@ mongoose.set('useCreateIndex', true);
 
 // Import of other modules
 const users = require('./routes/user');
+const data = require('./routes/data');
 
 //Middlewares
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/users', users);
+app.use('/data', data);
 
 
 //Routes

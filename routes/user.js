@@ -54,7 +54,6 @@ router.post('/register', async(req, res) => {
     });
 });
 
-
 router.post('/login', (req, res) => {
     let uname = req.body.username;
     let psswd = req.body.password;
