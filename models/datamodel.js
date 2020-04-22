@@ -3,11 +3,11 @@ const mongoose = require('mongoose');
 const dataSchema = mongoose.Schema({
     eventname: {
         type: String,
-        required: true    
+        required: true
     },
     eventtype: {
         type: String,
-        required: true        
+        required: true
     },
     players: {
         type: Array,
@@ -16,7 +16,8 @@ const dataSchema = mongoose.Schema({
     eventdate: {
         type: Date,
         default: Date.now
+            // default: Date
     }
 });
 
-module.exports = mongoose.model('data',dataSchema);
+module.exports = mongoose.model('data', dataSchema);

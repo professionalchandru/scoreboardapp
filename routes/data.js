@@ -3,10 +3,14 @@ const router = express.Router();
 const Joi = require('@hapi/joi');
 Joi.objectId = require('joi-objectid')(Joi)
 
+
+//import middleware for session token from jwt
+const auth = require('../middlewares/auth');
+
 //import datamodel for schema
 const datamodel = require('../models/datamodel');
 
-// const playerschema = Joi.array().items(Joi.object().keys({
+// const playerschema = Joi.array().items(Joi.  object().keys({
 //     name: Joi.string().min(2).required(),
 //     sprno: Joi.number().min(4).max(4).required(),
 //     department: Joi.string().min(2).max(50).required(),
@@ -18,7 +22,7 @@ const Schema = Joi.object().keys({
     _id: Joi.objectId,
     eventname: Joi.string().alphanum().trim().min(2).required(),
     eventtype: Joi.string().trim().required(),
-    players:  Joi.array().items(Joi.object().keys({
+    players: Joi.array().items(Joi.object().keys({
         name: Joi.string().min(2).required(),
         sprno: Joi.number().required(),
         department: Joi.string().min(2).max(50).required(),
@@ -28,19 +32,20 @@ const Schema = Joi.object().keys({
     eventdate: Joi.date()
 });
 
-router.get('/showresults', async(req, res) => {
-    try{
-    const showresult = await datamodel.find({},{_id:0});
-    res.json(showresult)
-    }
-    catch(err){
-        if(err){
-            res.json({message:err})
+router.get('/', auth, async(req, res) => {
+    try {
+        const showresult = await datamodel.find({}, { _id: 0 });
+        res.json(showresult)
+    } catch (err) {
+        if (err) {
+            res.json({ message: err })
         }
     }
+    // res.send(req.user)
+    // res.json({ eventname: '100meters', eventtype: 'timing' })
 });
 
-router.post('/insert', async(req, res) => {    
+router.post('/insert', auth, async(req, res) => {
     ieventname = req.body.eventname
     ieventtype = req.body.eventtype
     iname1 = req.body.name1
@@ -59,26 +64,25 @@ router.post('/insert', async(req, res) => {
     itiming2 = req.body.timing2
     itiming3 = req.body.timing3
 
-    newobj ={
+    newobj = {
         eventname: ieventname,
         eventtype: ieventtype,
-        players: [
-            {
-                name:iname1,
+        players: [{
+                name: iname1,
                 sprno: isprno1,
                 department: idepartment1,
                 year: iyear1,
                 timing: itiming1
             },
             {
-                name:iname2,
+                name: iname2,
                 sprno: isprno2,
                 department: idepartment2,
                 year: iyear2,
                 timing: itiming2
             },
             {
-                name:iname3,
+                name: iname3,
                 sprno: isprno3,
                 department: idepartment3,
                 year: iyear3,
@@ -88,22 +92,44 @@ router.post('/insert', async(req, res) => {
     }
     insertdata = new datamodel(newobj)
     const validate = Schema.validate(insertdata.toObject())
-    if(validate.error == null){
-        const inserted_data = await insertdata.save((err,result)=> {
-            if(err){
+    if (validate.error == null) {
+        const inserted_data = await insertdata.save((err, result) => {
+            if (err) {
                 console.log(err)
                 res.json(err)
-            }
-            else{
+            } else {
                 console.log(result)
                 res.json(result)
             }
-        })   
-    }
-    else{
+        })
+    } else {
         console.log(validate.error.message)
         res.json(validate.error.message)
     }
 });
+
+// db.datas.aggregate([
+//     { $year: { "your desired fields" } }
+// ])
+
+// router.delete('/:eventname/:year', auth, async(req, res) => {
+//     year = req.params.year
+//     console.log(year)
+//     let e_year = datamodel.aggregate([{
+//         $project: {
+//             year: { $year: req.params.year }
+//         }
+//     }]);
+//     console.log(e_year)
+//         // try {
+//         //     const delete_event = await datamodel.remove({ eventname: req.params.eventname, eventdate: req.params.eventdate })
+//         //     res.json(delete_event);
+//         // } catch (err) {
+//         //     if (err) {
+//         //         console.log(err)
+//         //         res.json({ message: err })
+//         //     }
+//         // }
+// })
 
 module.exports = router;
